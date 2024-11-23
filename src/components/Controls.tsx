@@ -25,7 +25,6 @@ interface ControlsProps {
   options: {
     kind: string;
     colorScheme: number;
-    // ... other options
   };
   onUpdateOptions: (options: any) => void;
   onPlayStop: () => void;

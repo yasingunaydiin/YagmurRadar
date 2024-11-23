@@ -9,13 +9,13 @@ interface TimestampProps {
 export default function Timestamp({ timestamp }: TimestampProps) {
   const pastOrForecast = timestamp > Date.now() ? 'TAHMİN' : 'GEÇMİŞ';
 
-  const formattedDate = new Date(timestamp).toLocaleString('en-US', {
+  const formattedDate = new Date(timestamp).toLocaleString('tr-TR', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true,
+    hour12: false,
   });
 
   return (
