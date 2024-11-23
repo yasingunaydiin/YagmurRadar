@@ -46,17 +46,6 @@ const WeatherMap = () => {
     setIsPlaying(!isPlaying);
   };
 
-  const formattedDate = new Date(timestamp).toLocaleString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  });
-
-  const pastOrForecast = timestamp > Date.now() ? 'FORECAST' : 'PAST';
-
   return (
     <div className='h-screen w-full relative bg-background'>
       <Map
@@ -95,7 +84,6 @@ const WeatherMap = () => {
               >
                 <RotateCcw className='h-4 w-4' />
               </Button>
-              <span className='text-sm font-medium'>{formattedDate}</span>
             </div>
             <div className='w-full md:w-1/2'>
               <Slider

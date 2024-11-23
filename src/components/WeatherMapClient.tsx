@@ -7,7 +7,7 @@ import Timestamp from './Timestamp';
 
 const Map = dynamic(() => import('./Map'), {
   ssr: false,
-  loading: () => <div>Loading map...</div>,
+  loading: () => <div>Harita yükleniyor...</div>,
 });
 
 export default function WeatherMapClient() {
@@ -88,16 +88,16 @@ export default function WeatherMapClient() {
     return null;
   }
 
-  const formattedDate = new Date(timestamp).toLocaleString('en-US', {
+  const formattedDate = new Date(timestamp).toLocaleString('tr-TR', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true,
+    hour12: false,
   });
 
-  const pastOrForecast = timestamp > Date.now() ? 'FORECAST' : 'PAST';
+  const pastOrForecast = timestamp > Date.now() ? 'TAHMİN' : 'GEÇMİŞ';
 
   return (
     <>

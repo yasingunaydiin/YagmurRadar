@@ -12,16 +12,13 @@ import {
 import { Separator } from '@/components/ui/separator';
 
 const colorSchemes = [
-  { value: 0, label: 'Black and White Values' },
-  { value: 1, label: 'Original' },
-  { value: 2, label: 'Universal Blue' },
+  { value: 1, label: 'Orijinal' },
+  { value: 2, label: 'Evrensel Mavi' },
   { value: 3, label: 'TITAN' },
   { value: 4, label: 'The Weather Channel' },
   { value: 5, label: 'Meteored' },
   { value: 6, label: 'NEXRAD Level-III' },
-  { value: 7, label: 'RAINBOW @ SELEX-SI' },
   { value: 8, label: 'Dark Sky' },
-  { value: 255, label: 'Raw Source' },
 ];
 
 interface ControlsProps {
@@ -45,46 +42,79 @@ export default function Controls({
   onNextFrame,
   isPlaying,
 }: ControlsProps) {
-  const handleColorSchemeChange = (value: string) => {
-    onUpdateOptions({
-      ...options,
-      colorScheme: parseInt(value),
-    });
-  };
-
   return (
     <div className='fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50'>
-      <div className='bg-background/80 backdrop-blur-lg rounded-full border border-border shadow-lg p-2 px-4'>
-        <div className='flex items-center gap-4'>
-          <RadioGroup
-            defaultValue={options.kind}
-            onValueChange={(value) =>
-              onUpdateOptions({ ...options, kind: value })
-            }
-            className='flex items-center'
-          >
-            <div className='flex items-center space-x-2'>
-              <RadioGroupItem value='radar' id='radar' />
-              <label htmlFor='radar' className='text-sm'>
-                Radar
-              </label>
-            </div>
-            <div className='flex items-center space-x-2 ml-4'>
-              <RadioGroupItem value='satellite' id='satellite' />
-              <label htmlFor='satellite' className='text-sm'>
-                Satellite
-              </label>
-            </div>
-          </RadioGroup>
+      <div className='bg-background/80 backdrop-blur-lg rounded-lg sm:rounded-xl border border-border shadow-lg p-2 px-4'>
+        <div className='flex flex-col sm:flex-row items-center gap-4'>
+          <div className='flex items-center gap-4 w-full sm:w-auto'>
+            <RadioGroup
+              defaultValue={options.kind}
+              onValueChange={(value) =>
+                onUpdateOptions({ ...options, kind: value })
+              }
+              className='flex items-center'
+            >
+              <div className='flex items-center space-x-2'>
+                <RadioGroupItem value='radar' id='radar' />
+                <label htmlFor='radar' className='text-sm'>
+                  Radar
+                </label>
+              </div>
+              <div className='flex items-center space-x-2 ml-4'>
+                <RadioGroupItem value='satellite' id='satellite' />
+                <label htmlFor='satellite' className='text-sm'>
+                  Uydu
+                </label>
+              </div>
+            </RadioGroup>
 
-          <Separator orientation='vertical' className='h-6' />
+            <Separator orientation='vertical' className='h-6 hidden sm:block' />
+
+            <div className='flex items-center gap-2'>
+              <Button
+                variant='ghost'
+                size='icon'
+                onClick={onPrevFrame}
+                className='h-8 w-8'
+              >
+                <ChevronLeftIcon className='h-4 w-4' />
+              </Button>
+              <Button
+                variant='ghost'
+                size='icon'
+                onClick={onPlayStop}
+                className='h-8 w-8'
+              >
+                {isPlaying ? (
+                  <PauseIcon className='h-4 w-4' />
+                ) : (
+                  <PlayIcon className='h-4 w-4' />
+                )}
+              </Button>
+              <Button
+                variant='ghost'
+                size='icon'
+                onClick={onNextFrame}
+                className='h-8 w-8'
+              >
+                <ChevronRightIcon className='h-4 w-4' />
+              </Button>
+            </div>
+          </div>
+
+          <Separator
+            orientation='horizontal'
+            className='w-full block sm:hidden'
+          />
 
           <Select
             value={options.colorScheme.toString()}
-            onValueChange={handleColorSchemeChange}
+            onValueChange={(value) =>
+              onUpdateOptions({ ...options, colorScheme: Number(value) })
+            }
           >
-            <SelectTrigger className='w-[180px]'>
-              <SelectValue placeholder='Select color scheme' />
+            <SelectTrigger className='w-full'>
+              <SelectValue placeholder='Renk şeması seçin' />
             </SelectTrigger>
             <SelectContent>
               {colorSchemes.map((scheme) => (
@@ -94,39 +124,6 @@ export default function Controls({
               ))}
             </SelectContent>
           </Select>
-
-          <Separator orientation='vertical' className='h-6' />
-
-          <div className='flex items-center gap-2'>
-            <Button
-              variant='ghost'
-              size='icon'
-              onClick={onPrevFrame}
-              className='h-8 w-8'
-            >
-              <ChevronLeftIcon className='h-4 w-4' />
-            </Button>
-            <Button
-              variant='ghost'
-              size='icon'
-              onClick={onPlayStop}
-              className='h-8 w-8'
-            >
-              {isPlaying ? (
-                <PauseIcon className='h-4 w-4' />
-              ) : (
-                <PlayIcon className='h-4 w-4' />
-              )}
-            </Button>
-            <Button
-              variant='ghost'
-              size='icon'
-              onClick={onNextFrame}
-              className='h-8 w-8'
-            >
-              <ChevronRightIcon className='h-4 w-4' />
-            </Button>
-          </div>
         </div>
       </div>
     </div>

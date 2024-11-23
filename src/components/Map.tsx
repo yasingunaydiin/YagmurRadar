@@ -30,13 +30,13 @@ interface MapProps {
 }
 
 const Map: FC<MapProps> = ({
-  timeOffset,
-  activeLayer,
+  //   timeOffset,
+  //   activeLayer,
   apiData,
   mapFrames,
   options,
   animationPosition,
-  isPlaying,
+  //isPlaying,
   onSetTimestamp,
 }) => {
   const mapRef = useRef<L.Map | null>(null);
@@ -140,20 +140,9 @@ const Map: FC<MapProps> = ({
     }
 
     if ((!preloadOnly && !isTilesLoading()) || force) {
-      const pastOrForecast =
-        nextFrame.time > Date.now() / 1000 ? 'FORECAST' : 'PAST';
       const timestamp = Number(nextFrame.time) * 1000;
-      const formattedDate = new Date(timestamp).toLocaleString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-      });
 
       onSetTimestamp(timestamp);
-      setDisplayTime(formattedDate);
     }
   };
 
