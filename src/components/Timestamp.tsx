@@ -2,8 +2,10 @@
 
 export default function Timestamp({ text }: { text: string }) {
   return (
-    <div className='absolute top-[50px] left-0 right-0 h-[30px] text-center'>
-      {text}
+    <div className='fixed top-8 left-1/2 transform -translate-x-1/2 z-50'>
+      <div className='bg-background/80 backdrop-blur-lg rounded-full border border-border shadow-lg px-4 py-2'>
+        <span className='text-sm font-medium'>{text}</span>
+      </div>
     </div>
   );
 }
