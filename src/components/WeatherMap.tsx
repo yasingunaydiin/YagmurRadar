@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { addHours, format } from 'date-fns';
 import { Cloud, CloudRain, Pause, Play, RotateCcw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Map from './Map';
@@ -15,6 +14,7 @@ const WeatherMap = () => {
   const [activeLayer, setActiveLayer] = useState<'clouds' | 'precipitation'>(
     'precipitation'
   );
+  const [timestamp, setTimestamp] = useState<number>(Date.now());
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -46,9 +46,36 @@ const WeatherMap = () => {
     setIsPlaying(!isPlaying);
   };
 
+  const formattedDate = new Date(timestamp).toLocaleString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+
+  const pastOrForecast = timestamp > Date.now() ? 'FORECAST' : 'PAST';
+
   return (
     <div className='h-screen w-full relative bg-background'>
-      <Map timeOffset={timeOffset} activeLayer={activeLayer} />
+      <Map
+        timeOffset={timeOffset}
+        activeLayer={activeLayer}
+        apiData={undefined}
+        mapFrames={[]}
+        options={{
+          kind: '',
+          colorScheme: 0,
+          tileSize: 0,
+          smoothData: 0,
+          snowColors: 0,
+          extension: '',
+        }}
+        animationPosition={0}
+        isPlaying={false}
+        onSetTimestamp={setTimestamp}
+      />
 
       <Card className='fixed bottom-4 left-1/2 transform -translate-x-1/2 w-[calc(100%-2rem)] max-w-3xl shadow-lg z-[9999]'>
         <CardContent className='p-4'>
@@ -68,9 +95,7 @@ const WeatherMap = () => {
               >
                 <RotateCcw className='h-4 w-4' />
               </Button>
-              <span className='text-sm font-medium'>
-                {format(addHours(new Date(), timeOffset), 'MMM dd, yyyy HH:mm')}
-              </span>
+              <span className='text-sm font-medium'>{formattedDate}</span>
             </div>
             <div className='w-full md:w-1/2'>
               <Slider

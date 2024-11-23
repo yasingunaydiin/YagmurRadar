@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import Controls from './Controls';
+import Timestamp from './Timestamp';
 
 const Map = dynamic(() => import('./Map'), {
   ssr: false,
@@ -10,7 +11,7 @@ const Map = dynamic(() => import('./Map'), {
 });
 
 export default function WeatherMapClient() {
-  const [timestamp, setTimestamp] = useState(new Date().toString());
+  const [timestamp, setTimestamp] = useState<number>(Date.now());
   const [apiData, setApiData] = useState<any>(null);
   const [mapFrames, setMapFrames] = useState<any[]>([]);
   const [animationPosition, setAnimationPosition] = useState(0);
@@ -64,6 +65,17 @@ export default function WeatherMapClient() {
     }
   };
 
+  const formattedDate = new Date(timestamp).toLocaleString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+
+  const pastOrForecast = timestamp > Date.now() ? 'FORECAST' : 'PAST';
+
   return (
     <>
       <Controls
@@ -75,7 +87,7 @@ export default function WeatherMapClient() {
         isPlaying={isPlaying}
       />
       <div className='absolute top-[50px] left-0 right-0 h-[30px] text-center'>
-        {timestamp}
+        <Timestamp text={`${pastOrForecast}: ${formattedDate}`} />
       </div>
       <Map
         apiData={apiData}
@@ -84,6 +96,8 @@ export default function WeatherMapClient() {
         animationPosition={animationPosition}
         isPlaying={isPlaying}
         onSetTimestamp={setTimestamp}
+        timeOffset={0}
+        activeLayer={'clouds'}
       />
     </>
   );

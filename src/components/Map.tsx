@@ -2,29 +2,48 @@
 
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useEffect, useRef } from 'react';
+import {
+  Dispatch,
+  FC,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 interface MapProps {
+  timeOffset: number;
+  activeLayer: 'clouds' | 'precipitation';
   apiData: any;
   mapFrames: any[];
-  options: any;
+  options: {
+    kind: string;
+    colorScheme: number;
+    tileSize: number;
+    smoothData: number;
+    snowColors: number;
+    extension: string;
+  };
   animationPosition: number;
   isPlaying: boolean;
-  onSetTimestamp: (text: string) => void;
+  onSetTimestamp: Dispatch<SetStateAction<number>>;
 }
 
-export default function Map({
+const Map: FC<MapProps> = ({
+  timeOffset,
+  activeLayer,
   apiData,
   mapFrames,
   options,
   animationPosition,
   isPlaying,
   onSetTimestamp,
-}: MapProps) {
+}) => {
   const mapRef = useRef<L.Map | null>(null);
   const radarLayersRef = useRef<{ [key: string]: L.TileLayer }>({});
   const loadingTilesCount = useRef(0);
   const loadedTilesCount = useRef(0);
+  const [displayTime, setDisplayTime] = useState<string>('');
 
   useEffect(() => {
     if (!mapRef.current) {
@@ -120,9 +139,18 @@ export default function Map({
     if ((!preloadOnly && !isTilesLoading()) || force) {
       const pastOrForecast =
         nextFrame.time > Date.now() / 1000 ? 'FORECAST' : 'PAST';
-      onSetTimestamp(
-        `${pastOrForecast}: ${new Date(nextFrame.time * 1000).toString()}`
-      );
+      const timestamp = Number(nextFrame.time) * 1000;
+      const formattedDate = new Date(timestamp).toLocaleString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      });
+
+      onSetTimestamp(timestamp);
+      setDisplayTime(formattedDate);
     }
   };
 
@@ -150,7 +178,7 @@ export default function Map({
     }
   }, [animationPosition]);
 
-  return (
-    <div id='map' className='absolute top-[80px] left-0 right-0 bottom-0' />
-  );
-}
+  return <div id='map' className='absolute left-0 right-0 bottom-0' />;
+};
+
+export default Map;
