@@ -2,10 +2,34 @@
 
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 
+const colorSchemes = [
+  { value: 0, label: 'Black and White Values' },
+  { value: 1, label: 'Original' },
+  { value: 2, label: 'Universal Blue' },
+  { value: 3, label: 'TITAN' },
+  { value: 4, label: 'The Weather Channel' },
+  { value: 5, label: 'Meteored' },
+  { value: 6, label: 'NEXRAD Level-III' },
+  { value: 7, label: 'RAINBOW @ SELEX-SI' },
+  { value: 8, label: 'Dark Sky' },
+  { value: 255, label: 'Raw Source' },
+];
+
 interface ControlsProps {
-  options: any;
+  options: {
+    kind: string;
+    colorScheme: number;
+    // ... other options
+  };
   onUpdateOptions: (options: any) => void;
   onPlayStop: () => void;
   onPrevFrame: () => void;
@@ -21,6 +45,13 @@ export default function Controls({
   onNextFrame,
   isPlaying,
 }: ControlsProps) {
+  const handleColorSchemeChange = (value: string) => {
+    onUpdateOptions({
+      ...options,
+      colorScheme: parseInt(value),
+    });
+  };
+
   return (
     <div className='fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50'>
       <div className='bg-background/80 backdrop-blur-lg rounded-full border border-border shadow-lg p-2 px-4'>
@@ -45,6 +76,24 @@ export default function Controls({
               </label>
             </div>
           </RadioGroup>
+
+          <Separator orientation='vertical' className='h-6' />
+
+          <Select
+            value={options.colorScheme.toString()}
+            onValueChange={handleColorSchemeChange}
+          >
+            <SelectTrigger className='w-[180px]'>
+              <SelectValue placeholder='Select color scheme' />
+            </SelectTrigger>
+            <SelectContent>
+              {colorSchemes.map((scheme) => (
+                <SelectItem key={scheme.value} value={scheme.value.toString()}>
+                  {scheme.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           <Separator orientation='vertical' className='h-6' />
 

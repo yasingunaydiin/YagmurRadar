@@ -11,7 +11,8 @@ const Map = dynamic(() => import('./Map'), {
 });
 
 export default function WeatherMapClient() {
-  const [timestamp, setTimestamp] = useState<number>(Date.now());
+  const [mounted, setMounted] = useState(false);
+  const [timestamp, setTimestamp] = useState<number>(0);
   const [apiData, setApiData] = useState<any>(null);
   const [mapFrames, setMapFrames] = useState<any[]>([]);
   const [animationPosition, setAnimationPosition] = useState(0);
@@ -22,17 +23,24 @@ export default function WeatherMapClient() {
     tileSize: 256,
     smoothData: 1,
     snowColors: 1,
-    extension: 'png',
+    extension: 'webp',
   });
 
   useEffect(() => {
-    fetch('https://api.rainviewer.com/public/weather-maps.json')
-      .then((res) => res.json())
-      .then((data) => {
-        setApiData(data);
-        initialize(data, options.kind);
-      });
+    setMounted(true);
+    setTimestamp(Date.now());
   }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      fetch('https://api.rainviewer.com/public/weather-maps.json')
+        .then((res) => res.json())
+        .then((data) => {
+          setApiData(data);
+          initialize(data, options.kind);
+        });
+    }
+  }, [mounted]);
 
   const initialize = (api: any, kind: string) => {
     if (!api) return;
@@ -54,16 +62,31 @@ export default function WeatherMapClient() {
     setMapFrames(frames);
   };
 
-  const handleUpdateOptions = (newOptions: Partial<typeof options>) => {
-    setOptions((prev) => ({
-      ...prev,
-      ...newOptions,
-      colorScheme: 2,
-    }));
+  const handleUpdateOptions = (newOptions: typeof options) => {
+    setOptions(newOptions);
     if (apiData) {
-      initialize(apiData, newOptions.kind || options.kind);
+      initialize(apiData, newOptions.kind);
     }
   };
+
+  useEffect(() => {
+    if (!mounted) return;
+
+    let intervalId: NodeJS.Timeout;
+    if (isPlaying && mapFrames.length > 0) {
+      intervalId = setInterval(() => {
+        setAnimationPosition((prev) => {
+          if (prev >= mapFrames.length - 1) return 0;
+          return prev + 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(intervalId);
+  }, [isPlaying, mapFrames.length, mounted]);
+
+  if (!mounted) {
+    return null;
+  }
 
   const formattedDate = new Date(timestamp).toLocaleString('en-US', {
     weekday: 'short',
@@ -76,30 +99,6 @@ export default function WeatherMapClient() {
 
   const pastOrForecast = timestamp > Date.now() ? 'FORECAST' : 'PAST';
 
-  // Add this useEffect for animation
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-
-    if (isPlaying && mapFrames.length > 0) {
-      intervalId = setInterval(() => {
-        setAnimationPosition((prev) => {
-          // Loop back to start when reaching the end
-          if (prev >= mapFrames.length - 1) {
-            return 0;
-          }
-          return prev + 1;
-        });
-      }, 1000); // Adjust this number to control animation speed (milliseconds)
-    }
-
-    // Cleanup interval on component unmount or when stopping
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [isPlaying, mapFrames.length]);
-
   return (
     <>
       <Controls
@@ -110,19 +109,23 @@ export default function WeatherMapClient() {
         onNextFrame={() => setAnimationPosition((prev) => prev + 1)}
         isPlaying={isPlaying}
       />
-      <div className='absolute top-[50px] left-0 right-0 h-[30px] text-center'>
-        <Timestamp text={`${pastOrForecast}: ${formattedDate}`} />
-      </div>
-      <Map
-        apiData={apiData}
-        mapFrames={mapFrames}
-        options={options}
-        animationPosition={animationPosition}
-        isPlaying={isPlaying}
-        onSetTimestamp={setTimestamp}
-        timeOffset={0}
-        activeLayer={'clouds'}
-      />
+      {mounted && (
+        <div className='absolute top-[50px] left-0 right-0 h-[30px] text-center'>
+          <Timestamp text={`${pastOrForecast}: ${formattedDate}`} />
+        </div>
+      )}
+      {mounted && (
+        <Map
+          apiData={apiData}
+          mapFrames={mapFrames}
+          options={options}
+          animationPosition={animationPosition}
+          isPlaying={isPlaying}
+          onSetTimestamp={setTimestamp}
+          timeOffset={0}
+          activeLayer={'clouds'}
+        />
+      )}
     </>
   );
 }

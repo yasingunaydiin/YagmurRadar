@@ -47,7 +47,10 @@ const Map: FC<MapProps> = ({
 
   useEffect(() => {
     if (!mapRef.current) {
-      mapRef.current = L.map('map').setView([48.8566, 2.3522], 6);
+      mapRef.current = L.map('map', {
+        center: [41.0082, 28.9784],
+        zoom: 7,
+      });
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
       }).addTo(mapRef.current);
