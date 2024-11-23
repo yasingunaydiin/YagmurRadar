@@ -76,6 +76,30 @@ export default function WeatherMapClient() {
 
   const pastOrForecast = timestamp > Date.now() ? 'FORECAST' : 'PAST';
 
+  // Add this useEffect for animation
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (isPlaying && mapFrames.length > 0) {
+      intervalId = setInterval(() => {
+        setAnimationPosition((prev) => {
+          // Loop back to start when reaching the end
+          if (prev >= mapFrames.length - 1) {
+            return 0;
+          }
+          return prev + 1;
+        });
+      }, 1000); // Adjust this number to control animation speed (milliseconds)
+    }
+
+    // Cleanup interval on component unmount or when stopping
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isPlaying, mapFrames.length]);
+
   return (
     <>
       <Controls
