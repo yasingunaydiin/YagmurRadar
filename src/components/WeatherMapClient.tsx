@@ -5,115 +5,96 @@ import { useEffect, useState } from 'react';
 import Controls from './Controls';
 import Timestamp from './Timestamp';
 
-// Dynamically import the Map component, disabling server-side rendering (SSR)
-// and showing a loading message while the map is being loaded.
+// Dynamically import the Map component with loading fallback
 const Map = dynamic(() => import('./Map'), {
   ssr: false,
   loading: () => <div>Harita yükleniyor...</div>,
 });
 
 export default function WeatherMapClient() {
-  // State to track the current timestamp displayed on the map.
-  const [timestamp, setTimestamp] = useState<number>(0);
+  const [timestamp, setTimestamp] = useState(0); // Current timestamp
+  const [apiData, setApiData] = useState(null); // Weather data
+  const [mapFrames, setMapFrames] = useState<any[]>([]); // Animation frames
+  const [animationPosition, setAnimationPosition] = useState(0); // Frame position
+  const [isPlaying, setIsPlaying] = useState(false); // Play/pause state
 
-  // State to store weather data fetched from the RainViewer API.
-  const [apiData, setApiData] = useState<any>(null);
-
-  // State to hold the sequence of map frames for animation.
-  const [mapFrames, setMapFrames] = useState<any[]>([]);
-
-  // State to track the current animation frame position.
-  const [animationPosition, setAnimationPosition] = useState(0);
-
-  // State to control whether the animation is playing or paused.
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  // State to manage map visualization options (e.g., radar/satellite type, color scheme).
   const [options, setOptions] = useState({
-    kind: 'radar', // Default to radar map.
-    colorScheme: 2, // Default color scheme.
-    tileSize: 256, // Tile size for map tiles.
-    smoothData: 1, // Enable smoothing for radar data.
-    snowColors: 1, // Enable snow color visualization.
-    extension: 'webp', // Tile image format.
+    kind: 'radar',
+    colorScheme: 2,
+    tileSize: 256,
+    smoothData: 1,
+    snowColors: 1,
+    extension: 'webp',
   });
 
-  // Fetch weather map data from the RainViewer API when the component mounts.
+  // Fetch weather map data
   useEffect(() => {
     fetch('https://api.rainviewer.com/public/weather-maps.json')
       .then((res) => res.json())
       .then((data) => {
-        setApiData(data); // Store the fetched data.
-        initialize(data, options.kind); // Initialize map frames based on data.
+        setApiData(data);
+        initializeFrames(data, options.kind);
       });
   }, []);
 
-  // Function to initialize map frames and set up animation based on map kind (radar or satellite).
-  const initialize = (api: any, kind: string) => {
+  // Initialize animation frames
+  const initializeFrames = (api: any, kind: string) => {
     if (!api) return;
 
-    let frames = [];
-    if (kind === 'satellite' && api.satellite?.infrared) {
-      // Use infrared frames for satellite visualization.
-      frames = api.satellite.infrared;
-      const lastPastFrame = frames.length - 1;
-      setAnimationPosition(lastPastFrame); // Set the animation to the last past frame.
-    } else if (api.radar?.past) {
-      // Use past radar frames, and append nowcast frames if available.
-      frames = [...api.radar.past];
-      if (api.radar.nowcast) {
-        frames = frames.concat(api.radar.nowcast);
-      }
-      const lastPastFrame = api.radar.past.length - 1;
-      setAnimationPosition(lastPastFrame); // Set the animation to the last past frame.
-    }
-    setMapFrames(frames); // Update the state with the new frames.
+    const frames =
+      kind === 'satellite' && api.satellite?.infrared
+        ? api.satellite.infrared
+        : [...(api.radar?.past || []), ...(api.radar?.nowcast || [])];
+
+    setMapFrames(frames);
+    setAnimationPosition((api.radar?.past?.length || frames.length) - 1);
   };
 
-  // Function to handle updates to map options, reinitializing map frames if necessary.
-  const handleUpdateOptions = (newOptions: typeof options) => {
+  // Update options and reinitialize frames
+  const updateOptions = (newOptions: typeof options) => {
     setOptions(newOptions);
-    if (apiData) {
-      initialize(apiData, newOptions.kind);
-    }
+    apiData && initializeFrames(apiData, newOptions.kind);
   };
 
-  // Play/pause animation logic: advances animation frame at a regular interval when playing.
+  // Animation logic
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-    if (isPlaying && mapFrames.length > 0) {
-      intervalId = setInterval(() => {
-        setAnimationPosition((prev) => {
-          if (prev >= mapFrames.length - 1) return 0; // Loop back to the start.
-          return prev + 1; // Advance to the next frame.
-        });
-      }, 1000); // Update frame every 1 second.
-    }
-    return () => clearInterval(intervalId); // Clear the interval when the component unmounts or `isPlaying` changes.
-  }, [isPlaying, mapFrames.length]);
+    if (!isPlaying || mapFrames.length === 0) return;
+
+    const intervalId = setInterval(() => {
+      setAnimationPosition((prev) =>
+        prev >= mapFrames.length - 1 ? 0 : prev + 1
+      );
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [isPlaying, mapFrames]);
 
   return (
     <>
       <Controls
         options={options}
-        onUpdateOptions={handleUpdateOptions}
-        onPlayStop={() => setIsPlaying(!isPlaying)} // Toggle play/pause state.
-        onPrevFrame={() => setAnimationPosition((prev) => prev - 1)} // Go to previous frame.
-        onNextFrame={() => setAnimationPosition((prev) => prev + 1)} // Go to next frame.
-        isPlaying={isPlaying} // Pass current play state to Controls.
+        onUpdateOptions={updateOptions}
+        onPlayStop={() => setIsPlaying(!isPlaying)}
+        onPrevFrame={() =>
+          setAnimationPosition((prev) => Math.max(prev - 1, 0))
+        }
+        onNextFrame={() =>
+          setAnimationPosition((prev) =>
+            Math.min(prev + 1, mapFrames.length - 1)
+          )
+        }
+        isPlaying={isPlaying}
       />
-
       <Timestamp timestamp={timestamp} />
-
       <Map
-        apiData={apiData} // Pass weather API data.
-        mapFrames={mapFrames} // Pass the frames for the animation.
-        options={options} // Pass the visualization options.
-        animationPosition={animationPosition} // Pass the current frame position.
-        isPlaying={isPlaying} // Pass the play state.
-        onSetTimestamp={setTimestamp} // Function to update the timestamp.
-        timeOffset={0} // Unused but passed as a placeholder.
-        activeLayer={'clouds'} // Unused but passed as a placeholder.
+        apiData={apiData}
+        mapFrames={mapFrames}
+        options={options}
+        animationPosition={animationPosition}
+        isPlaying={isPlaying}
+        onSetTimestamp={setTimestamp}
+        timeOffset={0}
+        activeLayer={'clouds'}
       />
     </>
   );
