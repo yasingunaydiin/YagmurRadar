@@ -7,8 +7,8 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Turkey Weather Map',
-  description: 'Real-time weather and precipitation map of Turkey',
+  title: 'Türkiye Bulut ve Yağmur Haritası',
+  description: 'Türkiye`nin gerçek zamanlı bulut ve yağmur haritası',
 };
 
 export default function RootLayout({
@@ -25,6 +25,7 @@ export default function RootLayout({
           integrity='sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY='
           crossOrigin=''
         />
+        <link rel='icon' href='/favicon.ico' />
       </head>
       <body className={inter.className}>{children}</body>
     </html>
