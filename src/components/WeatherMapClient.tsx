@@ -11,7 +11,6 @@ const Map = dynamic(() => import('./Map'), {
 });
 
 export default function WeatherMapClient() {
-  const [mounted, setMounted] = useState(false);
   const [timestamp, setTimestamp] = useState<number>(0);
   const [apiData, setApiData] = useState<any>(null);
   const [mapFrames, setMapFrames] = useState<any[]>([]);
@@ -27,20 +26,13 @@ export default function WeatherMapClient() {
   });
 
   useEffect(() => {
-    setMounted(true);
-    setTimestamp(Date.now());
+    fetch('https://api.rainviewer.com/public/weather-maps.json')
+      .then((res) => res.json())
+      .then((data) => {
+        setApiData(data);
+        initialize(data, options.kind);
+      });
   }, []);
-
-  useEffect(() => {
-    if (mounted) {
-      fetch('https://api.rainviewer.com/public/weather-maps.json')
-        .then((res) => res.json())
-        .then((data) => {
-          setApiData(data);
-          initialize(data, options.kind);
-        });
-    }
-  }, [mounted]);
 
   const initialize = (api: any, kind: string) => {
     if (!api) return;
@@ -70,8 +62,6 @@ export default function WeatherMapClient() {
   };
 
   useEffect(() => {
-    if (!mounted) return;
-
     let intervalId: NodeJS.Timeout;
     if (isPlaying && mapFrames.length > 0) {
       intervalId = setInterval(() => {
@@ -82,22 +72,7 @@ export default function WeatherMapClient() {
       }, 1000);
     }
     return () => clearInterval(intervalId);
-  }, [isPlaying, mapFrames.length, mounted]);
-
-  if (!mounted) {
-    return null;
-  }
-
-  const formattedDate = new Date(timestamp).toLocaleString('tr-TR', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: false,
-  });
-
-  const pastOrForecast = timestamp > Date.now() ? 'TAHMİN' : 'GEÇMİŞ';
+  }, [isPlaying, mapFrames.length]);
 
   return (
     <>
@@ -109,23 +84,17 @@ export default function WeatherMapClient() {
         onNextFrame={() => setAnimationPosition((prev) => prev + 1)}
         isPlaying={isPlaying}
       />
-      {mounted && (
-        <div className='absolute top-[50px] left-0 right-0 h-[30px] text-center'>
-          <Timestamp text={`${pastOrForecast}: ${formattedDate}`} />
-        </div>
-      )}
-      {mounted && (
-        <Map
-          apiData={apiData}
-          mapFrames={mapFrames}
-          options={options}
-          animationPosition={animationPosition}
-          isPlaying={isPlaying}
-          onSetTimestamp={setTimestamp}
-          timeOffset={0}
-          activeLayer={'clouds'}
-        />
-      )}
+      <Timestamp timestamp={timestamp} />
+      <Map
+        apiData={apiData}
+        mapFrames={mapFrames}
+        options={options}
+        animationPosition={animationPosition}
+        isPlaying={isPlaying}
+        onSetTimestamp={setTimestamp}
+        timeOffset={0}
+        activeLayer={'clouds'}
+      />
     </>
   );
 }

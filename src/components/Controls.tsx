@@ -44,7 +44,7 @@ export default function Controls({
 }: ControlsProps) {
   return (
     <div className='fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50'>
-      <div className='bg-background/80 backdrop-blur-lg rounded-lg sm:rounded-xl border border-border shadow-lg p-2 px-4'>
+      <div className='bg-background/80 backdrop-blur-lg rounded-xl sm:rounded-xl border border-border shadow-lg p-2 px-4'>
         <div className='flex flex-col sm:flex-row items-center gap-4'>
           <div className='flex items-center gap-4 w-full sm:w-auto'>
             <RadioGroup
