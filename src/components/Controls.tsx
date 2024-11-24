@@ -10,15 +10,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { ChevronLeftIcon, DraftingCompass } from 'lucide-react';
+import { useState } from 'react';
+import { WeatherLegend } from './WeatherLegend';
 
 const colorSchemes = [
   { value: 1, label: 'Orijinal' },
   { value: 2, label: 'Evrensel Mavi' },
   { value: 3, label: 'TITAN' },
   { value: 4, label: 'The Weather Channel' },
-  { value: 5, label: 'Meteored' },
-  { value: 6, label: 'NEXRAD Level-III' },
-  { value: 8, label: 'Dark Sky' },
+  { value: 5, label: 'NEXRAD Level-III' },
+  { value: 6, label: 'Dark Sky' },
 ];
 
 interface ControlsProps {
@@ -41,11 +43,109 @@ export default function Controls({
   onNextFrame,
   isPlaying,
 }: ControlsProps) {
+  const [open, setOpen] = useState(false);
+
+  const colorMapping: Record<
+    string,
+    Array<{ color: string; label: string }>
+  > = {
+    '1': [
+      // Orjinal
+      { color: '#D1D5DB', label: 'Bulutlu' },
+      { color: '#BBF7D0', label: 'Çiseleme' },
+      { color: '#6EE7B7', label: 'Hafif yağmur' },
+      { color: '#3B82F6', label: 'Orta yağmur' },
+      { color: '#F9A8D4', label: 'Yoğun yağmur' },
+      { color: '#DC2626', label: 'Dolu' },
+      { color: '#7fefff', label: 'Hafif Kar' },
+      { color: '#5fcfff', label: 'Orta Kar' },
+      { color: '#3f9fff', label: 'Yoğun Kar' },
+    ],
+    '2': [
+      // Evrensel Mavi
+      { color: '#cfbf87', label: 'Bulutlu' },
+      { color: '#88ddef', label: 'Çiseleme' },
+      { color: '#0277aa', label: 'Hafif yağmur' },
+      { color: '#ffee00', label: 'Orta yağmur' },
+      { color: '#ff4400', label: 'Yoğun yağmur' },
+      { color: '#ffaaff', label: 'Dolu' },
+      { color: '#a0dfff', label: 'Hafif Kar' },
+      { color: '#5f9fff', label: 'Orta Kar' },
+      { color: '#3e80ff', label: 'Yoğun Kar' },
+    ],
+    '3': [
+      // TITAN
+      { color: '#077fdb', label: 'Bulutlu' },
+      { color: '#1d47e8', label: 'Çiseleme' },
+      { color: '#c81086', label: 'Hafif yağmur' },
+      { color: '#d2883b', label: 'Orta yağmur' },
+      { color: '#fffb00', label: 'Yoğun yağmur' },
+      { color: '#fd5f03', label: 'Dolu' },
+      { color: '#a0dfff', label: 'Hafif Kar' },
+      { color: '#5f9fff', label: 'Orta Kar' },
+      { color: '#3e80ff', label: 'Yoğun Kar' },
+    ],
+    '4': [
+      // The Weather Channel
+      { color: '#63eb62', label: 'Bulutlu' },
+      { color: '#3dc63d', label: 'Çiseleme' },
+      { color: '#106719', label: 'Hafif yağmur' },
+      { color: '#ffff00', label: 'Orta yağmur' },
+      { color: '#e60001', label: 'Yoğun yağmur' },
+      { color: '#9b0000', label: 'Dolu' },
+      { color: '#a0dfff', label: 'Hafif Kar' },
+      { color: '#5f9fff', label: 'Orta Kar' },
+      { color: '#3e80ff', label: 'Yoğun Kar' },
+    ],
+    '5': [
+      // NEXRAD Level-III
+      { color: '#01efe7', label: 'Bulutlu' },
+      { color: '#0000f7', label: 'Çiseleme' },
+      { color: '#02b706', label: 'Hafif yağmur' },
+      { color: '#02b706', label: 'Orta yağmur' },
+      { color: '#fe9301', label: 'Yoğun yağmur' },
+      { color: '#bd0000', label: 'Dolu' },
+      { color: '#51cffd', label: 'Hafif Kar' },
+      { color: '#1075fb', label: 'Orta Kar' },
+      { color: '#103ffb', label: 'Yoğun Kar' },
+    ],
+    '6': [
+      // Dark Sky
+      { color: '#015eb6', label: 'Bulutlu' },
+      { color: '#015eb6', label: 'Çiseleme' },
+      { color: '#2458af', label: 'Hafif yağmur' },
+      { color: '#fc5470', label: 'Orta yağmur' },
+      { color: '#fffd02', label: 'Yoğun yağmur' },
+      { color: '#fffd02', label: 'Dolu' },
+      { color: '#a0dfff', label: 'Hafif Kar' },
+      { color: '#5f9fff', label: 'Orta Kar' },
+      { color: '#3e80ff', label: 'Yoğun Kar' },
+    ],
+  };
+
+  // Get the current legend colors based on options.colorScheme
+  const legendColors = colorMapping[options.colorScheme] || [];
+
   return (
     <div className='fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50'>
       <div className='bg-background/80 backdrop-blur-lg rounded-xl sm:rounded-xl border border-border shadow-lg p-2 px-4'>
         <div className='flex flex-col sm:flex-row items-center gap-4'>
           <div className='flex items-center gap-4 w-full sm:w-auto'>
+            <Button
+              className='h-8 w-8'
+              size='icon'
+              onClick={() => setOpen(true)}
+              variant='ghost'
+            >
+              <DraftingCompass className='h-4 w-4' />
+            </Button>
+
+            <WeatherLegend
+              open={open}
+              onOpenChange={setOpen}
+              legendColors={legendColors}
+            />
+
             <RadioGroup
               defaultValue={options.kind}
               onValueChange={(value) =>
@@ -106,11 +206,12 @@ export default function Controls({
             className='w-full block sm:hidden'
           />
 
+          {/* Updated Select for Color Scheme */}
           <Select
             value={options.colorScheme.toString()}
-            onValueChange={(value) =>
-              onUpdateOptions({ ...options, colorScheme: Number(value) })
-            }
+            onValueChange={(value) => {
+              onUpdateOptions({ ...options, colorScheme: Number(value) });
+            }}
           >
             <SelectTrigger className='w-full'>
               <SelectValue placeholder='Renk şeması seçin' />
@@ -130,24 +231,6 @@ export default function Controls({
 }
 
 // Icons
-function ChevronLeftIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns='http://www.w3.org/2000/svg'
-      width='24'
-      height='24'
-      viewBox='0 0 24 24'
-      fill='none'
-      stroke='currentColor'
-      strokeWidth='2'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      {...props}
-    >
-      <path d='m15 18-6-6 6-6' />
-    </svg>
-  );
-}
 
 function ChevronRightIcon(props: React.SVGProps<SVGSVGElement>) {
   return (

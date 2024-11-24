@@ -56,7 +56,7 @@ export default function WeatherMapClient() {
     apiData && initializeFrames(apiData, newOptions.kind);
   };
 
-  // Animation logic
+  // Play button logic
   useEffect(() => {
     if (!isPlaying || mapFrames.length === 0) return;
 
@@ -94,7 +94,6 @@ export default function WeatherMapClient() {
         isPlaying={isPlaying}
         onSetTimestamp={setTimestamp}
         timeOffset={0}
-        activeLayer={'clouds'}
       />
     </>
   );

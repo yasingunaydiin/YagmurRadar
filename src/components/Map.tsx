@@ -6,7 +6,7 @@ import { Dispatch, FC, SetStateAction, useEffect, useRef } from 'react';
 
 interface MapProps {
   timeOffset: number;
-  activeLayer: 'clouds' | 'precipitation';
+  // activeLayer: 'clouds' | 'precipitation';
   apiData: any;
   mapFrames: any[];
   options: {
