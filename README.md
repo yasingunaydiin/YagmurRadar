@@ -1,6 +1,6 @@
-<img width="128px" src="src/public/YagmurBulutIzleyici_logo.png" alt="Logo" align="left" />
+<img width="128px" src="src/public/islanacakmiyim-logo.png" alt="Logo" align="left" />
 
-# Yağmur Bulut İzleyici
+# Islanacakmiyim.com
 
 A real-time cloud and rain radar map for Turkey, built using Leaflet.js. This web application provides an interactive map to monitor cloud cover and precipitation across Turkey. Users can track weather patterns in real-time and explore different radar layers for up-to-date weather conditions.
 
