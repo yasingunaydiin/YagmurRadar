@@ -1,4 +1,3 @@
-// src/app/layout.tsx
 import { Analytics } from '@vercel/analytics/react';
 import 'leaflet/dist/leaflet.css';
 import type { Metadata } from 'next';
@@ -8,7 +7,7 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Türkiye Bulut ve Yağmur Haritası',
+  title: 'Islanacak mıyım? Türkiye Bulut ve Yağmur Haritası',
   description: 'Türkiye`nin gerçek zamanlı bulut ve yağmur haritası',
 };
 

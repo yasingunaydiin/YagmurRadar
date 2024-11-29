@@ -1,12 +1,30 @@
 'use client';
 
+import { UserLocationContext } from '@/context/UserLocationContext';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Dispatch, FC, SetStateAction, useEffect, useRef } from 'react';
+import {
+  Dispatch,
+  FC,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useRef,
+} from 'react';
+import ReactDOMServer from 'react-dom/server';
+
+// Add marker icon configuration
+const icon = L.icon({
+  iconUrl: '/marker-icon.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowUrl: '/marker-icon.png',
+  shadowSize: [41, 41],
+});
 
 interface MapProps {
   timeOffset: number;
-  // activeLayer: 'clouds' | 'precipitation';
   apiData: any;
   mapFrames: any[];
   options: {
@@ -33,23 +51,83 @@ const Map: FC<MapProps> = ({
   const radarLayersRef = useRef<{ [key: string]: L.TileLayer }>({});
   const loadingTilesCount = useRef(0);
   const loadedTilesCount = useRef(0);
+  const markerRef = useRef<L.Marker | null>(null);
+  const userLocationContext = useContext(UserLocationContext);
+
+  // Create custom icon using Lucide React icon
+  const customIcon = L.divIcon({
+    html: ReactDOMServer.renderToString(
+      <div className='relative w-7 h-7'>
+        <div className='absolute inset-1 rounded-full bg-[#6a6aff] opacity-50 animate-ping' />
+        <div className='absolute inset-2 rounded-full bg-[#1848d7]' />
+      </div>
+    ),
+    className: 'custom-div-icon',
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -16],
+  });
 
   useEffect(() => {
+    console.log('User location context:', userLocationContext);
+    if (userLocationContext?.userLocation) {
+      console.log('User coordinates:', userLocationContext.userLocation);
+    }
+  }, [userLocationContext?.userLocation]);
+
+  useEffect(() => {
+    // Initialize map immediately with a default center
     if (!mapRef.current) {
-      mapRef.current = L.map('map', { center: [41.0082, 28.9784], zoom: 7 });
+      mapRef.current = L.map('map', {
+        center: [41.0082, 28.9784], // Default center (can be changed)
+        zoom: 7,
+      });
+
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
       }).addTo(mapRef.current);
 
-      // Set initial timestamp to "now" when the map initializes.
       onSetTimestamp(Date.now());
     }
 
+    // Pan to user location when available
+    if (userLocationContext?.userLocation && mapRef.current) {
+      mapRef.current.setView(
+        [
+          userLocationContext.userLocation.lat,
+          userLocationContext.userLocation.lng,
+        ],
+        10,
+        { animate: true, duration: 1 } // Smooth animation to user location
+      );
+
+      // Update marker
+      if (markerRef.current) {
+        markerRef.current.remove();
+      }
+
+      try {
+        markerRef.current = L.marker(
+          [
+            userLocationContext.userLocation.lat,
+            userLocationContext.userLocation.lng,
+          ],
+          { icon: customIcon }
+        ).addTo(mapRef.current);
+
+        markerRef.current.bindPopup('Your location');
+      } catch (error) {
+        console.error('Error adding marker:', error);
+      }
+    }
     return () => {
+      if (markerRef.current) {
+        markerRef.current.remove();
+      }
       mapRef.current?.remove();
       mapRef.current = null;
     };
-  }, [onSetTimestamp]);
+  }, [onSetTimestamp, userLocationContext?.userLocation]);
 
   const manageTileCount = (isLoading: boolean) => {
     if (isLoading) loadingTilesCount.current++;

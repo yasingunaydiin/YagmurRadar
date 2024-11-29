@@ -106,3 +106,9 @@ input[type='checkbox'] {
   cursor: pointer;
   margin: 0 4px;
 }
+
+/* Add to your global CSS */
+.custom-div-icon {
+  background: none !important;
+  border: none !important;
+}

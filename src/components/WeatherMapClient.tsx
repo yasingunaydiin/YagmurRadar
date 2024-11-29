@@ -8,7 +8,11 @@ import Timestamp from './Timestamp';
 // Dynamically import the Map component with loading fallback
 const Map = dynamic(() => import('./Map'), {
   ssr: false,
-  loading: () => <div>Harita yükleniyor...</div>,
+  loading: () => (
+    <div className='flex items-center justify-center h-screen text-2xl'>
+      Harita yükleniyor...
+    </div>
+  ),
 });
 
 export default function WeatherMapClient() {
