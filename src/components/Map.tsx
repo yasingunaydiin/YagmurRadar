@@ -81,6 +81,7 @@ const Map: FC<MapProps> = ({
       mapRef.current = L.map('map', {
         center: [41.0082, 28.9784], // Default center (can be changed)
         zoom: 7,
+        zoomControl: false,
       });
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

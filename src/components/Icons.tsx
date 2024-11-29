@@ -3,7 +3,7 @@ import React from 'react';
 
 const Icons: React.FC = () => {
   return (
-    <div className='absolute z-10 top-0 right-0 mt-5 mr-5 flex items-center gap-3'>
+    <div className='absolute z-10 top-0 right-0 mt-5 mr-5 flex items-center sm:flex-row flex-col gap-3'>
       <a
         href='https://github.com/yasingunaydiin'
         target='_blank'

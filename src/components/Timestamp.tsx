@@ -19,7 +19,7 @@ export default function Timestamp({ timestamp }: TimestampProps) {
   });
 
   return (
-    <div className='fixed top-4 left-1/2 transform -translate-x-1/2 z-40'>
+    <div className='fixed top-4 left-1/2 transform -translate-x-1/2 z-40 w-56'>
       <Card className='bg-background/80 backdrop-blur-lg border border-border shadow-lg'>
         <div className='px-4 py-2'>
           <span className='text-sm font-medium'>
