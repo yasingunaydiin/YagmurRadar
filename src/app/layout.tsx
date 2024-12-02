@@ -19,6 +19,10 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <head>
+        <meta
+          name='google-site-verification'
+          content='qdci-EoEw4rYKxJZ37SBB455jRY9X5HjlQWLk1-a4y0'
+        />
         <link
           rel='stylesheet'
           href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
