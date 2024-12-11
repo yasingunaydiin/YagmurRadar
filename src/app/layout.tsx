@@ -30,6 +30,10 @@ export default function RootLayout({
           crossOrigin=''
         />
         <link rel='icon' href='/favicon.ico' />
+        <meta
+          name='google-site-verification'
+          content='-9nXkAChkekC_pznMQROWam11ktW9DrG2Jg6bce4rgI'
+        />
       </head>
       <body className={inter.className}>{children}</body>
       <Analytics />
