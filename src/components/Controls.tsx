@@ -23,16 +23,17 @@ const colorSchemes = [
   { value: 6, label: 'Dark Sky' },
 ];
 
+// Define the type of props that the Controls component will receive
 interface ControlsProps {
   options: {
-    kind: string;
-    colorScheme: number;
+    kind: string; // Type of display (e.g., radar or satellite)
+    colorScheme: number; // Selected color scheme
   };
-  onUpdateOptions: (options: any) => void;
-  onPlayStop: () => void;
-  onPrevFrame: () => void;
-  onNextFrame: () => void;
-  isPlaying: boolean;
+  onUpdateOptions: (options: any) => void; // Callback to update options
+  onPlayStop: () => void; // Callback to toggle play/pause
+  onPrevFrame: () => void; // Callback for previous frame
+  onNextFrame: () => void; // Callback for next frame
+  isPlaying: boolean; // Boolean to track whether the animation is playing
 }
 
 export default function Controls({
@@ -43,9 +44,10 @@ export default function Controls({
   onNextFrame,
   isPlaying,
 }: ControlsProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false); // Local state for opening the weather legend
 
   const colorMapping: Record<
+    // Mapping of color schemes to their corresponding weather conditions and colors
     string,
     Array<{ color: string; label: string }>
   > = {

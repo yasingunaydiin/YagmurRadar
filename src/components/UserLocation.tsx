@@ -18,17 +18,12 @@ const UserLocation: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const getUserLocation = () => {
-    navigator.geolocation.getCurrentPosition(
-      function (pos) {
-        setUserLocation({
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-        });
-      },
-      function (error) {
-        console.error('Error getting location:', error);
-      }
-    );
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      setUserLocation({
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+      });
+    });
   };
 
   return (

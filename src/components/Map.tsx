@@ -13,16 +13,7 @@ import {
 } from 'react';
 import ReactDOMServer from 'react-dom/server';
 
-// Add marker icon configuration
-const icon = L.icon({
-  iconUrl: '/marker-icon.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowUrl: '/marker-icon.png',
-  shadowSize: [41, 41],
-});
-
+// Define the props for the Map component
 interface MapProps {
   timeOffset: number;
   apiData: any;
@@ -47,12 +38,13 @@ const Map: FC<MapProps> = ({
   animationPosition,
   onSetTimestamp,
 }) => {
+  // Refs to store the map, layers, and marker instances
   const mapRef = useRef<L.Map | null>(null);
   const radarLayersRef = useRef<{ [key: string]: L.TileLayer }>({});
-  const loadingTilesCount = useRef(0);
-  const loadedTilesCount = useRef(0);
-  const markerRef = useRef<L.Marker | null>(null);
-  const userLocationContext = useContext(UserLocationContext);
+  const loadingTilesCount = useRef(0); // Tracks the number of loading tiles
+  const loadedTilesCount = useRef(0); // Tracks the number of loaded tiles
+  const markerRef = useRef<L.Marker | null>(null); // Ref for the user location marker
+  const userLocationContext = useContext(UserLocationContext); // User location context
 
   // Create custom icon using Lucide React icon
   const customIcon = L.divIcon({
@@ -68,6 +60,7 @@ const Map: FC<MapProps> = ({
     popupAnchor: [0, -16],
   });
 
+  // Effect to log the user's location whenever it changes
   useEffect(() => {
     console.log('User location context:', userLocationContext);
     if (userLocationContext?.userLocation) {
@@ -76,18 +69,20 @@ const Map: FC<MapProps> = ({
   }, [userLocationContext?.userLocation]);
 
   useEffect(() => {
-    // Initialize map immediately with a default center
+    // Initialize the map only once
     if (!mapRef.current) {
       mapRef.current = L.map('map', {
-        center: [41.0082, 28.9784], // Default center (can be changed)
-        zoom: 7,
-        zoomControl: false,
+        center: [41.0082, 28.9784], // Default center
+        zoom: 7, // Default zoom level
+        zoomControl: false, // Disable zoom control
       });
 
+      // Add OpenStreetMap tile layer to the map
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
       }).addTo(mapRef.current);
 
+      // Set initial timestamp
       onSetTimestamp(Date.now());
     }
 
@@ -98,7 +93,7 @@ const Map: FC<MapProps> = ({
           userLocationContext.userLocation.lat,
           userLocationContext.userLocation.lng,
         ],
-        10,
+        10, // Zoom level
         { animate: true, duration: 1 } // Smooth animation to user location
       );
 
@@ -107,6 +102,7 @@ const Map: FC<MapProps> = ({
         markerRef.current.remove();
       }
 
+      // Add a new marker for the user's location
       try {
         markerRef.current = L.marker(
           [
@@ -116,11 +112,14 @@ const Map: FC<MapProps> = ({
           { icon: customIcon }
         ).addTo(mapRef.current);
 
+        // Bind a popup to the marker
         markerRef.current.bindPopup('Your location');
       } catch (error) {
         console.error('Error adding marker:', error);
       }
     }
+
+    // Cleanup function to remove the marker and map when the component is unmounted
     return () => {
       if (markerRef.current) {
         markerRef.current.remove();
@@ -130,11 +129,13 @@ const Map: FC<MapProps> = ({
     };
   }, [onSetTimestamp, userLocationContext?.userLocation]);
 
+  // Manage tile loading and loading count
   const manageTileCount = (isLoading: boolean) => {
     if (isLoading) loadingTilesCount.current++;
     else setTimeout(() => loadedTilesCount.current++, 250);
   };
 
+  // Add a new radar layer to the map
   const addLayer = (frame: any) => {
     if (!mapRef.current || !apiData || radarLayersRef.current[frame.path])
       return;
@@ -150,19 +151,25 @@ const Map: FC<MapProps> = ({
       { tileSize: 256, opacity: 0.01, zIndex: frame.time }
     );
 
+    // Handle loading and removing of tiles
     source.on('loading', () => manageTileCount(true));
     source.on('load', () => manageTileCount(false));
     source.on('remove', () => manageTileCount(false));
     radarLayersRef.current[frame.path] = source;
   };
 
+  // Change the radar position on the map based on the animation frame
   const changeRadarPosition = (position: number, preloadOnly = false) => {
     if (!mapFrames.length || !mapRef.current) return;
 
     const currentFrame = mapFrames[position % mapFrames.length];
+
+    // Remove existing radar layers
     Object.values(radarLayersRef.current).forEach((layer) =>
       mapRef.current?.removeLayer(layer)
     );
+
+    // Add the new radar layer
     addLayer(currentFrame);
 
     const layer = radarLayersRef.current[currentFrame.path];
@@ -170,6 +177,7 @@ const Map: FC<MapProps> = ({
       mapRef.current.addLayer(layer);
       layer.setOpacity(100);
 
+      // Update the timestamp if all tiles have loaded
       if (
         !preloadOnly &&
         loadingTilesCount.current <= loadedTilesCount.current
@@ -179,16 +187,20 @@ const Map: FC<MapProps> = ({
     }
   };
 
+  // Re-run the effect when options or map frames change
   useEffect(() => {
+    // Cleanup existing layers
     Object.values(radarLayersRef.current).forEach((layer) =>
       mapRef.current?.removeLayer(layer)
     );
     radarLayersRef.current = {};
     loadingTilesCount.current = loadedTilesCount.current = 0;
 
+    // Change radar position based on the animation position
     if (mapFrames.length) changeRadarPosition(animationPosition);
   }, [options.kind, options.colorScheme]);
 
+  // Update radar position when the animation position changes
   useEffect(() => {
     if (mapFrames.length) changeRadarPosition(animationPosition);
   }, [animationPosition]);
