@@ -20,7 +20,7 @@ export default function WeatherMapClient() {
   const [apiData, setApiData] = useState(null); // Weather data
   const [mapFrames, setMapFrames] = useState<any[]>([]); // Animation frames
   const [animationPosition, setAnimationPosition] = useState(0); // Frame position
-  const [isPlaying, setIsPlaying] = useState(false); // Play/pause state
+  const [isPlaying, setIsPlaying] = useState(true); // Play/pause state
 
   const [options, setOptions] = useState({
     kind: 'radar',

@@ -7,7 +7,7 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Islanacak mıyım? Türkiye Bulut ve Yağmur Haritası',
+  title: 'Islanacak mıyım?',
   description: 'Türkiye`nin gerçek zamanlı bulut ve yağmur haritası',
 };
 
